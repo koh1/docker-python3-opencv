@@ -1,5 +1,9 @@
-FROM python:3.6
+#FROM python:3.6
+FROM ubuntu:xenial
 MAINTAINER Josip Janzic <josip.janzic@gmail.com>
+RUN apt-get update && apt-get install -y software-properties-common
+
+RUN add-apt-repository "deb http://security.ubuntu.com/ubuntu xenial-security main"
 
 RUN apt-get update && \
         apt-get install -y \
@@ -10,17 +14,26 @@ RUN apt-get update && \
         unzip \
         yasm \
         pkg-config \
+	python3 \
+	python3-pip \
+	libpython3-dev \
+	python3-dev \
         libswscale-dev \
         libtbb2 \
         libtbb-dev \
         libjpeg-dev \
         libpng-dev \
         libtiff-dev \
+        libjasper1 \	
         libjasper-dev \
+#	libopenjpeg-dev \
         libavformat-dev \
         libpq-dev
 
-RUN pip install numpy
+RUN pip3 install numpy
+RUN pip3 install tensorflow
+RUN pip3 install jupyter
+RUN pip3 install matplotlib
 
 WORKDIR /
 ENV OPENCV_VERSION="3.4.1"
@@ -41,10 +54,10 @@ RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip \
   -DBUILD_TESTS=OFF \
   -DBUILD_PERF_TESTS=OFF \
   -DCMAKE_BUILD_TYPE=RELEASE \
-  -DCMAKE_INSTALL_PREFIX=$(python3.6 -c "import sys; print(sys.prefix)") \
-  -DPYTHON_EXECUTABLE=$(which python3.6) \
-  -DPYTHON_INCLUDE_DIR=$(python3.6 -c "from distutils.sysconfig import get_python_inc; print(get_python_inc())") \
-  -DPYTHON_PACKAGES_PATH=$(python3.6 -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())") .. \
+  -DCMAKE_INSTALL_PREFIX=$(python3 -c "import sys; print(sys.prefix)") \
+  -DPYTHON_EXECUTABLE=$(which python3) \
+  -DPYTHON_INCLUDE_DIR=$(python3 -c "from distutils.sysconfig import get_python_inc; print(get_python_inc())") \
+  -DPYTHON_PACKAGES_PATH=$(python3 -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())") .. \
 && make install \
 && rm /${OPENCV_VERSION}.zip \
 && rm -r /opencv-${OPENCV_VERSION}
